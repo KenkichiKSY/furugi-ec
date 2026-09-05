@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.name }}">
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h1>{{ product.name }}</h1>
+        <p class="text-muted">{{ product.category.name }}</p>
+        <p class="h3">{{ product.price }}円</p>
+        <p>状態: {{ product.get_condition_display }}</p>
+        <p>在庫: {{ product.stock }}点</p>
+        <p>{{ product.description|linebreaks }}</p>
+        <a href="{% url 'products:list' %}" class="btn btn-secondary">一覧に戻る</a>
+    </div>
+</div>
+{% endblock %}

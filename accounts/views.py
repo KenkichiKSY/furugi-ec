@@ -1,3 +1,16 @@
-from django.shortcuts import render
+from django.contrib.auth import login
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
 
-# Create your views here.
+from .forms import SignUpForm
+
+
+class SignUpView(CreateView):
+    form_class = SignUpForm
+    template_name = 'accounts/signup.html'
+    success_url = reverse_lazy('products:list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)  # 登録後に自動ログイン
+        return response
