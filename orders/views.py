@@ -8,6 +8,9 @@ from django.views.generic import ListView, TemplateView
 from products.models import Product
 
 from .models import Cart, Order, OrderItem
+from accounts.models import Address
+
+from .shipping import calculate_shipping_fee
 
 
 def _get_cart(user):
@@ -40,7 +43,14 @@ class CartDetailView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cart'] = _get_cart(self.request.user)
+        cart = _get_cart(self.request.user)
+        subtotal = cart.total_price()
+        shipping_fee = calculate_shipping_fee(subtotal)
+        context['cart'] = cart
+        context['subtotal'] = subtotal
+        context['shipping_fee'] = shipping_fee
+        context['total_with_shipping'] = subtotal + shipping_fee
+        context['addresses'] = self.request.user.addresses.all()
         return context
 
 
@@ -53,13 +63,32 @@ def checkout(request):
         messages.error(request, "カートが空です。")
         return redirect('orders:cart_detail')
 
+    address_id = request.POST.get('address_id')
+    if not address_id:
+        messages.error(request, "配送先を選択してください。")
+        return redirect('orders:cart_detail')
+
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+    subtotal = cart.total_price()
+    shipping_fee = calculate_shipping_fee(subtotal)
+
     with transaction.atomic():
         for item in items:
             if item.quantity > item.product.stock:
                 messages.error(request, f"{item.product.name}の在庫が不足しています。")
                 return redirect('orders:cart_detail')
 
-        order = Order.objects.create(user=request.user, total_price=cart.total_price())
+        order = Order.objects.create(
+            user=request.user,
+            total_price=subtotal + shipping_fee,
+            shipping_fee=shipping_fee,
+            shipping_recipient_name=address.recipient_name,
+            shipping_postal_code=address.postal_code,
+            shipping_prefecture=address.prefecture,
+            shipping_city=address.city,
+            shipping_building=address.building,
+            shipping_phone_number=address.phone_number,
+        )
         for item in items:
             OrderItem.objects.create(
                 order=order,

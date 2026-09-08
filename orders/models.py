@@ -44,6 +44,15 @@ class Order(models.Model):
     )
     status = models.CharField('ステータス', max_length=20, choices=STATUS_CHOICES, default='pending')
     total_price = models.PositiveIntegerField('合計金額')
+
+    shipping_recipient_name = models.CharField('お届け先氏名', max_length=100, default='')
+    shipping_postal_code = models.CharField('郵便番号', max_length=8, default='')
+    shipping_prefecture = models.CharField('都道府県', max_length=20, default='')
+    shipping_city = models.CharField('市区町村・番地', max_length=200, default='')
+    shipping_building = models.CharField('建物名など', max_length=200, blank=True, default='')
+    shipping_phone_number = models.CharField('電話番号', max_length=20, default='')
+    shipping_fee = models.PositiveIntegerField('送料', default=0)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

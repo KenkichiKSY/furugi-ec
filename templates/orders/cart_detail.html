@@ -24,11 +24,30 @@
         {% endfor %}
     </tbody>
 </table>
-<p class="h4">合計: {{ cart.total_price }}円</p>
+
+<p>小計: {{ subtotal }}円</p>
+<p>送料: {{ shipping_fee }}円{% if shipping_fee == 0 %}(5,000円以上で送料無料){% endif %}</p>
+<p class="h4">合計: {{ total_with_shipping }}円</p>
+
+<h2>配送先を選択</h2>
+{% if addresses %}
 <form method="post" action="{% url 'orders:checkout' %}">
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary">注文を確定する</button>
+    {% for address in addresses %}
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="address_id" value="{{ address.id }}"
+               id="address{{ address.id }}" {% if address.is_default %}checked{% endif %}>
+        <label class="form-check-label" for="address{{ address.id }}">
+            {{ address.recipient_name }} 〒{{ address.postal_code }} {{ address.prefecture }}{{ address.city }}{{ address.building }}
+        </label>
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary mt-3">注文を確定する</button>
 </form>
+{% else %}
+<p>配送先住所が登録されていません。<a href="{% url 'accounts:address_add' %}">先に配送先を登録してください</a>。</p>
+{% endif %}
+
 {% else %}
 <p>カートは空です。</p>
 {% endif %}

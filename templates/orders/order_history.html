@@ -12,6 +12,8 @@
             <li>{{ item.product_name }} × {{ item.quantity }}({{ item.subtotal }}円)</li>
             {% endfor %}
         </ul>
+        <p>送料: {{ order.shipping_fee }}円</p>
+        <p>お届け先: {{ order.shipping_recipient_name }} 〒{{ order.shipping_postal_code }} {{ order.shipping_prefecture }}{{ order.shipping_city }}{{ order.shipping_building }}</p>
         <p class="fw-bold">合計: {{ order.total_price }}円</p>
     </div>
 </div>
