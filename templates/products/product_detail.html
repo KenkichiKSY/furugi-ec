@@ -16,6 +16,14 @@
         <p>状態: {{ product.get_condition_display }}</p>
         <p>在庫: {{ product.stock }}点</p>
         <p>{{ product.description|linebreaks }}</p>
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'orders:add_to_cart' product.slug %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">カートに追加</button>
+        </form>
+        {% else %}
+        <p><a href="{% url 'login' %}">ログイン</a>するとカートに追加できます。</p>
+        {% endif %}
         <a href="{% url 'products:list' %}" class="btn btn-secondary">一覧に戻る</a>
     </div>
 </div>

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}カート{% endblock %}
+{% block content %}
+<h1>カート</h1>
+{% if cart.items.all %}
+<table class="table">
+    <thead>
+        <tr><th>商品</th><th>単価</th><th>数量</th><th>小計</th><th></th></tr>
+    </thead>
+    <tbody>
+        {% for item in cart.items.all %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.product.price }}円</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.subtotal }}円</td>
+            <td>
+                <form method="post" action="{% url 'orders:remove_from_cart' item.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">削除</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p class="h4">合計: {{ cart.total_price }}円</p>
+<form method="post" action="{% url 'orders:checkout' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">注文を確定する</button>
+</form>
+{% else %}
+<p>カートは空です。</p>
+{% endif %}
+{% endblock %}

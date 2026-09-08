@@ -1,0 +1,89 @@
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import ListView, TemplateView
+
+from products.models import Product
+
+from .models import Cart, Order, OrderItem
+
+
+def _get_cart(user):
+    cart, _ = Cart.objects.get_or_create(user=user)
+    return cart
+
+
+@login_required
+def add_to_cart(request, slug):
+    product = get_object_or_404(Product, slug=slug, is_active=True)
+    cart = _get_cart(request.user)
+    item, created = cart.items.get_or_create(product=product)
+    if not created:
+        item.quantity += 1
+        item.save()
+    messages.success(request, f"{product.name}をカートに追加しました。")
+    return redirect('orders:cart_detail')
+
+
+@login_required
+def remove_from_cart(request, item_id):
+    item = get_object_or_404(Cart, user=request.user).items.filter(id=item_id).first()
+    if item:
+        item.delete()
+    return redirect('orders:cart_detail')
+
+
+class CartDetailView(LoginRequiredMixin, TemplateView):
+    template_name = 'orders/cart_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cart'] = _get_cart(self.request.user)
+        return context
+
+
+@login_required
+def checkout(request):
+    cart = _get_cart(request.user)
+    items = list(cart.items.select_related('product'))
+
+    if not items:
+        messages.error(request, "カートが空です。")
+        return redirect('orders:cart_detail')
+
+    with transaction.atomic():
+        for item in items:
+            if item.quantity > item.product.stock:
+                messages.error(request, f"{item.product.name}の在庫が不足しています。")
+                return redirect('orders:cart_detail')
+
+        order = Order.objects.create(user=request.user, total_price=cart.total_price())
+        for item in items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                product_name=item.product.name,
+                price=item.product.price,
+                quantity=item.quantity,
+            )
+            item.product.stock -= item.quantity
+            item.product.save()
+        cart.items.all().delete()
+
+    messages.success(request, "ご注文ありがとうございます。")
+    return redirect('orders:order_history')
+
+
+class OrderHistoryView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = 'orders/order_history.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        return (
+            Order.objects.filter(user=self.request.user)
+            .prefetch_related('items')
+            .order_by('-created_at')
+        )
