@@ -4,6 +4,40 @@
 
 {% block content %}
 <h1 class="mb-4">商品一覧</h1>
+
+<form method="get" class="row g-2 mb-4 align-items-end">
+    <div class="col-md-3">
+        {{ form.q.label_tag }}
+        {{ form.q }}
+    </div>
+    <div class="col-md-2">
+        {{ form.category.label_tag }}
+        {{ form.category }}
+    </div>
+    <div class="col-md-2">
+        {{ form.condition.label_tag }}
+        {{ form.condition }}
+    </div>
+    <div class="col-md-1">
+        {{ form.min_price.label_tag }}
+        {{ form.min_price }}
+    </div>
+    <div class="col-md-1">
+        {{ form.max_price.label_tag }}
+        {{ form.max_price }}
+    </div>
+    <div class="col-md-2">
+        {{ form.sort.label_tag }}
+        {{ form.sort }}
+    </div>
+    <div class="col-md-1">
+        <button type="submit" class="btn btn-primary w-100">検索</button>
+    </div>
+</form>
+{% if form.errors %}
+<div class="alert alert-danger">入力内容をご確認ください。</div>
+{% endif %}
+
 <div class="row">
     {% for product in products %}
     <div class="col-md-3 mb-4">
@@ -20,7 +54,7 @@
         </div>
     </div>
     {% empty %}
-    <p>商品がまだ登録されていません。</p>
+    <p>該当する商品が見つかりませんでした。</p>
     {% endfor %}
 </div>
 
@@ -28,11 +62,11 @@
 <nav>
     <ul class="pagination">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">前へ</a></li>
+        <li class="page-item"><a class="page-link" href="{% querystring page=page_obj.previous_page_number %}">前へ</a></li>
         {% endif %}
         <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">次へ</a></li>
+        <li class="page-item"><a class="page-link" href="{% querystring page=page_obj.next_page_number %}">次へ</a></li>
         {% endif %}
     </ul>
 </nav>
