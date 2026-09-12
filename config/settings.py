@@ -140,6 +140,8 @@ MAILERS = {
     },
 }
 
+DEFAULT_FROM_EMAIL = 'noreply@furugi-shop.example.com'
+
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
