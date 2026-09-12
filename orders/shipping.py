@@ -1,5 +1,11 @@
-SHIPPING_FEE = 500
-FREE_SHIPPING_THRESHOLD = 5000
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SHIPPING_FEE = int(os.getenv("SHIPPING_FEE"))
+FREE_SHIPPING_THRESHOLD = int(os.getenv("FREE_SHIPPING_THRESHOLD"))
 
 
 def calculate_shipping_fee(subtotal):

@@ -42,7 +42,7 @@
         </label>
     </div>
     {% endfor %}
-    <button type="submit" class="btn btn-primary mt-3">注文を確定する</button>
+    <button type="submit" class="btn btn-primary mt-3">お支払いに進む</button>
 </form>
 {% else %}
 <p>配送先住所が登録されていません。<a href="{% url 'accounts:address_add' %}">先に配送先を登録してください</a>。</p>
