@@ -50,6 +50,16 @@
                 <p class="card-text">{{ product.price }}円</p>
                 <p class="card-text"><small class="text-muted">{{ product.get_condition_display }}</small></p>
                 <a href="{% url 'products:detail' product.slug %}" class="btn btn-primary">詳細を見る</a>
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'products:toggle_favorite' product.slug %}" class="d-inline">
+                    {% csrf_token %}
+                    {% if product.id in favorite_product_ids %}
+                    <button type="submit" class="btn btn-sm btn-danger">♥</button>
+                    {% else %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">♡</button>
+                    {% endif %}
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>

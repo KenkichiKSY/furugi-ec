@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 
@@ -60,3 +61,55 @@ class Product(models.Model):
         if not self.slug:
             self.slug = slugify(self.name, allow_unicode=True)
         super().save(*args, **kwargs)
+
+    def average_rating(self):
+        reviews = self.reviews.all()
+        if not reviews:
+            return None
+        return sum(review.rating for review in reviews) / len(reviews)
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='favorites'
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='favorited_by'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'お気に入り'
+        verbose_name_plural = 'お気に入り'
+        ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'product'], name='unique_favorite')
+        ]
+
+    def __str__(self):
+        return f"{self.user} - {self.product}"
+
+
+class Review(models.Model):
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='reviews'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews'
+    )
+    rating = models.PositiveSmallIntegerField('評価', choices=RATING_CHOICES)
+    comment = models.TextField('コメント', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'レビュー'
+        verbose_name_plural = 'レビュー'
+        ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['product', 'user'], name='unique_review')
+        ]
+
+    def __str__(self):
+        return f"{self.product} - {self.user}({self.rating})"

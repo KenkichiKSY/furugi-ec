@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Category, Product
+from .models import Category, Product, Review
 
 
 class ProductSearchForm(forms.Form):
@@ -22,3 +22,12 @@ class ProductSearchForm(forms.Form):
     min_price = forms.IntegerField(label='価格(下限)', required=False, min_value=0)
     max_price = forms.IntegerField(label='価格(上限)', required=False, min_value=0)
     sort = forms.ChoiceField(label='並び替え', choices=SORT_CHOICES, required=False)
+
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']
+        widgets = {
+            'comment': forms.Textarea(attrs={'rows': 4}),
+        }
