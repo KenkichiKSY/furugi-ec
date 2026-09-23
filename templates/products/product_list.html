@@ -3,68 +3,84 @@
 {% block title %}商品一覧{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">商品一覧</h1>
+<section class="shop-hero">
+    <div>
+        <span class="label eyebrow">SECONDHAND × NEW</span>
+        <h1>長く着られる服には、<br>理由がある。</h1>
+        <p class="lede">一点物のヴィンテージ品と新品商品を取り揃えています。古着と新品を組み合わせたコーディネート提案も行っています。</p>
+        {% if INSTAGRAM_URL %}
+        <a class="link-quiet" href="{{ INSTAGRAM_URL }}" target="_blank" rel="noopener noreferrer">Instagramでコーディネート例を見る →</a>
+        {% endif %}
+    </div>
+    <div class="shop-hero-shot">
+        <svg class="rack-art" viewBox="0 0 300 90" preserveAspectRatio="none">
+            <line x1="10" y1="8" x2="290" y2="8"/>
+            <path d="M50 8 l0 14 l-14 14 M50 22 l14 14"/>
+            <path d="M110 8 l0 14 l-14 14 M110 22 l14 14"/>
+            <path d="M170 8 l0 14 l-14 14 M170 22 l14 14"/>
+            <path d="M230 8 l0 14 l-14 14 M230 22 l14 14"/>
+        </svg>
+    </div>
+</section>
 
-<form method="get" class="row g-2 mb-4 align-items-end">
-    <div class="col-md-3">
+<form method="get" class="search-form">
+    <div class="field">
         {{ form.q.label_tag }}
         {{ form.q }}
     </div>
-    <div class="col-md-2">
+    <div class="field">
         {{ form.category.label_tag }}
         {{ form.category }}
     </div>
-    <div class="col-md-2">
+    <div class="field">
         {{ form.condition.label_tag }}
         {{ form.condition }}
     </div>
-    <div class="col-md-1">
+    <div class="field">
         {{ form.min_price.label_tag }}
         {{ form.min_price }}
     </div>
-    <div class="col-md-1">
+    <div class="field">
         {{ form.max_price.label_tag }}
         {{ form.max_price }}
     </div>
-    <div class="col-md-2">
+    <div class="field">
         {{ form.sort.label_tag }}
         {{ form.sort }}
     </div>
-    <div class="col-md-1">
-        <button type="submit" class="btn btn-primary w-100">検索</button>
-    </div>
+    <button type="submit">検索</button>
 </form>
 {% if form.errors %}
 <div class="alert alert-danger">入力内容をご確認ください。</div>
 {% endif %}
 
-<div class="row">
+<div class="product-grid">
     {% for product in products %}
-    <div class="col-md-3 mb-4">
-        <div class="card h-100">
+    <article class="product-card">
+        <div class="product-thumb {% if not product.image %}{% cycle 'tex-flannel' 'tex-denim' 'tex-cord' 'tex-knit' 'tex-leather' 'tex-twill' 'tex-flannel-navy' 'tex-denim-dark' %}{% endif %}">
             {% if product.image %}
-            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
             {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">{{ product.name }}</h5>
-                <p class="card-text">{{ product.price }}円</p>
-                <p class="card-text"><small class="text-muted">{{ product.get_condition_display }}</small></p>
-                <a href="{% url 'products:detail' product.slug %}" class="btn btn-primary">詳細を見る</a>
-                {% if user.is_authenticated %}
-                <form method="post" action="{% url 'products:toggle_favorite' product.slug %}" class="d-inline">
-                    {% csrf_token %}
-                    {% if product.id in favorite_product_ids %}
-                    <button type="submit" class="btn btn-sm btn-danger">♥</button>
-                    {% else %}
-                    <button type="submit" class="btn btn-sm btn-outline-danger">♡</button>
-                    {% endif %}
-                </form>
-                {% endif %}
-            </div>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'products:toggle_favorite' product.slug %}">
+                {% csrf_token %}
+                <button type="submit" class="fav-btn {% if product.id in favorite_product_ids %}active{% endif %}" aria-label="お気に入りに追加">
+                    <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9.3-8.8C1.4 8 2.8 4.8 6 4.2c2-.4 3.7.6 6 3 2.3-2.4 4-3.4 6-3 3.2.6 4.6 3.8 3.3 7C19 15.6 12 20 12 20z"/></svg>
+                </button>
+            </form>
+            {% endif %}
         </div>
-    </div>
+        <div class="meta-top">
+            <span class="rank {% if product.condition == 'new' %}new{% else %}used{% endif %}">{{ product.get_condition_display }}</span>
+        </div>
+        <div class="product-name"><a href="{% url 'products:detail' product.slug %}">{{ product.name }}</a></div>
+        <div class="product-foot">
+            <span class="price num">¥{{ product.price }}</span>
+            <a class="view-link" href="{% url 'products:detail' product.slug %}">詳細</a>
+        </div>
+    </article>
     {% empty %}
-    <p>該当する商品が見つかりませんでした。</p>
+    <p class="empty-note">該当する商品が見つかりませんでした。</p>
     {% endfor %}
 </div>
 

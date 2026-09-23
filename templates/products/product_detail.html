@@ -3,57 +3,65 @@
 {% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-6">
+<div class="detail-grid">
+    <div class="detail-media tex-flannel">
         {% if product.image %}
-        <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.name }}">
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
         {% endif %}
     </div>
-    <div class="col-md-6">
-        <h1>{{ product.name }}</h1>
-        <p class="text-muted">{{ product.category.name }}</p>
-        <p class="h3">{{ product.price }}円</p>
-        <p>状態: {{ product.get_condition_display }}</p>
-        <p>在庫: {{ product.stock }}点</p>
-        <p>{{ product.description|linebreaks }}</p>
-        {% if user.is_authenticated %}
-        <form method="post" action="{% url 'orders:add_to_cart' product.slug %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary">カートに追加</button>
-        </form>
-        <form method="post" action="{% url 'products:toggle_favorite' product.slug %}" class="d-inline">
-            {% csrf_token %}
-            {% if is_favorited %}
-            <button type="submit" class="btn btn-danger">♥ お気に入り解除</button>
+    <div>
+        <span class="rank {% if product.condition == 'new' %}new{% else %}used{% endif %}">{{ product.get_condition_display }}</span>
+        <p class="detail-category label">{{ product.category.name }}</p>
+        <h1 class="detail-title">{{ product.name }}</h1>
+        <p class="detail-price num">¥{{ product.price }}</p>
+        <p class="detail-desc">{{ product.description|linebreaks }}</p>
+        <p class="detail-stock">在庫: {{ product.stock }}点</p>
+
+        <div class="detail-actions">
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'orders:add_to_cart' product.slug %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-solid">
+                    <svg viewBox="0 0 24 24"><path d="M3 6h2l1.6 10.6a2 2 0 0 0 2 1.7h8.8a2 2 0 0 0 2-1.6L21 9H6"/><circle cx="10" cy="21" r="1"/><circle cx="17" cy="21" r="1"/></svg>
+                    カートに追加
+                </button>
+            </form>
+            <form method="post" action="{% url 'products:toggle_favorite' product.slug %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-outline {% if is_favorited %}active{% endif %}">
+                    <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9.3-8.8C1.4 8 2.8 4.8 6 4.2c2-.4 3.7.6 6 3 2.3-2.4 4-3.4 6-3 3.2.6 4.6 3.8 3.3 7C19 15.6 12 20 12 20z"/></svg>
+                    {% if is_favorited %}お気に入り解除{% else %}お気に入りに追加{% endif %}
+                </button>
+            </form>
             {% else %}
-            <button type="submit" class="btn btn-outline-danger">♡ お気に入りに追加</button>
+            <p><a href="{% url 'login' %}">ログイン</a>するとカートに追加・お気に入り登録ができます。</p>
             {% endif %}
-        </form>
-        {% else %}
-        <p><a href="{% url 'login' %}">ログイン</a>するとカートに追加・お気に入り登録ができます。</p>
-        {% endif %}
-        <a href="{% url 'products:list' %}" class="btn btn-secondary">一覧に戻る</a>
+            <a href="{% url 'products:list' %}" class="btn-outline">一覧に戻る</a>
+        </div>
     </div>
 </div>
 
-<hr>
-<h2>レビュー</h2>
-{% if product.reviews.exists %}
-<p>平均評価: {{ product.average_rating|floatformat:1 }} / 5({{ product.reviews.count }}件)</p>
-{% for review in product.reviews.all %}
-<div class="mb-3 border-bottom pb-2">
-    <strong>{{ review.user.username }}</strong> — {{ review.rating }} / 5
-    <p>{{ review.comment|linebreaks }}</p>
-    <small class="text-muted">{{ review.created_at }}</small>
-</div>
-{% endfor %}
-{% else %}
-<p>まだレビューはありません。</p>
-{% endif %}
+<div class="torn" aria-hidden="true"></div>
 
-{% if can_review %}
-<a href="{% url 'products:add_review' product.slug %}" class="btn btn-outline-primary">レビューを書く</a>
-{% elif user.is_authenticated %}
-<p class="text-muted">購入済みの方のみレビューを投稿できます。</p>
-{% endif %}
+<section class="reviews">
+    <h2>レビュー</h2>
+    {% if product.reviews.exists %}
+    <p class="review-summary">平均評価: {{ product.average_rating|floatformat:1 }} / 5({{ product.reviews.count }}件)</p>
+    {% for review in product.reviews.all %}
+    <div class="review-item">
+        <strong>{{ review.user.username }}</strong> <span class="num">— {{ review.rating }} / 5</span>
+        <p>{{ review.comment|linebreaks }}</p>
+        <small>{{ review.created_at }}</small>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="empty-note">まだレビューはありません。</p>
+    {% endif %}
+
+    {% if can_review %}
+    <a href="{% url 'products:add_review' product.slug %}" class="btn-outline">レビューを書く</a>
+    {% elif user.is_authenticated %}
+    <p class="empty-note">購入済みの方のみレビューを投稿できます。</p>
+    {% endif %}
+</section>
 {% endblock %}
