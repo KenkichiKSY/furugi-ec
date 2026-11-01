@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}配送先住所の登録{% endblock %}
 {% block content %}
-<h1>配送先住所の登録・編集</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">保存</button>
-</form>
+<div class="form-card">
+    <h1>配送先住所の登録・編集</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="form-actions">
+            <button type="submit" class="btn-solid">保存</button>
+        </div>
+    </form>
+</div>
 {% endblock %}

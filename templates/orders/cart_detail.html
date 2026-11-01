@@ -3,7 +3,7 @@
 {% block content %}
 <h1>カート</h1>
 {% if cart.items.all %}
-<table class="table">
+<table class="cart-table">
     <thead>
         <tr><th>商品</th><th>単価</th><th>数量</th><th>小計</th><th></th></tr>
     </thead>
@@ -11,13 +11,13 @@
         {% for item in cart.items.all %}
         <tr>
             <td>{{ item.product.name }}</td>
-            <td>{{ item.product.price }}円</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.subtotal }}円</td>
+            <td class="num">{{ item.product.price }}円</td>
+            <td class="num">{{ item.quantity }}</td>
+            <td class="num">{{ item.subtotal }}円</td>
             <td>
                 <form method="post" action="{% url 'orders:remove_from_cart' item.id %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-outline-danger">削除</button>
+                    <button type="submit" class="view-link as-button">削除</button>
                 </form>
             </td>
         </tr>
@@ -25,24 +25,28 @@
     </tbody>
 </table>
 
-<p>小計: {{ subtotal }}円</p>
-<p>送料: {{ shipping_fee }}円{% if shipping_fee == 0 %}(5,000円以上で送料無料){% endif %}</p>
-<p class="h4">合計: {{ total_with_shipping }}円</p>
+<div class="cart-summary">
+    <p><span>小計</span><span>{{ subtotal }}円</span></p>
+    <p><span>送料</span><span>{{ shipping_fee }}円{% if shipping_fee == 0 %}(5,000円以上で送料無料){% endif %}</span></p>
+    <p class="total"><span>合計</span><span>{{ total_with_shipping }}円</span></p>
+</div>
 
 <h2>配送先を選択</h2>
 {% if addresses %}
 <form method="post" action="{% url 'orders:checkout' %}">
     {% csrf_token %}
     {% for address in addresses %}
-    <div class="form-check">
-        <input class="form-check-input" type="radio" name="address_id" value="{{ address.id }}"
+    <div class="address-choice">
+        <input type="radio" name="address_id" value="{{ address.id }}"
                id="address{{ address.id }}" {% if address.is_default %}checked{% endif %}>
-        <label class="form-check-label" for="address{{ address.id }}">
+        <label for="address{{ address.id }}">
             {{ address.recipient_name }} 〒{{ address.postal_code }} {{ address.prefecture }}{{ address.city }}{{ address.building }}
         </label>
     </div>
     {% endfor %}
-    <button type="submit" class="btn btn-primary mt-3">お支払いに進む</button>
+    <div class="form-actions">
+        <button type="submit" class="btn-solid">お支払いに進む</button>
+    </div>
 </form>
 {% else %}
 <p>配送先住所が登録されていません。<a href="{% url 'accounts:address_add' %}">先に配送先を登録してください</a>。</p>

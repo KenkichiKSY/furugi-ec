@@ -3,11 +3,15 @@
 {% block title %}レビューを書く{% endblock %}
 
 {% block content %}
-<h1>{{ product.name }}のレビュー</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">投稿する</button>
-</form>
-<a href="{% url 'products:detail' product.slug %}" class="btn btn-secondary">戻る</a>
+<div class="form-card">
+    <h1>{{ product.name }}のレビュー</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="form-actions">
+            <button type="submit" class="btn-solid">投稿する</button>
+            <a href="{% url 'products:detail' product.slug %}" class="btn-outline">戻る</a>
+        </div>
+    </form>
+</div>
 {% endblock %}

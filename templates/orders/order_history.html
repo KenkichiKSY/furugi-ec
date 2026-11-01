@@ -2,22 +2,22 @@
 {% block title %}注文履歴{% endblock %}
 {% block content %}
 <h1>注文履歴</h1>
-{% for order in orders %}
-<div class="card mb-3">
-    <div class="card-body">
-        <h5>注文#{{ order.id }}({{ order.get_status_display }})</h5>
+<div class="panel-list">
+    {% for order in orders %}
+    <div class="panel">
+        <p class="panel-title">注文 #{{ order.id }}<span class="badge-quiet">{{ order.get_status_display }}</span></p>
         <p>{{ order.created_at }}</p>
         <ul>
             {% for item in order.items.all %}
-            <li>{{ item.product_name }} × {{ item.quantity }}({{ item.subtotal }}円)</li>
+            <li>{{ item.product_name }} × {{ item.quantity }}(<span class="num">{{ item.subtotal }}円</span>)</li>
             {% endfor %}
         </ul>
-        <p>送料: {{ order.shipping_fee }}円</p>
+        <p>送料: <span class="num">{{ order.shipping_fee }}円</span></p>
         <p>お届け先: {{ order.shipping_recipient_name }} 〒{{ order.shipping_postal_code }} {{ order.shipping_prefecture }}{{ order.shipping_city }}{{ order.shipping_building }}</p>
-        <p class="fw-bold">合計: {{ order.total_price }}円</p>
+        <p class="order-total num">合計: {{ order.total_price }}円</p>
     </div>
+    {% empty %}
+    <div class="panel"><p class="empty-note">注文履歴はまだありません。</p></div>
+    {% endfor %}
 </div>
-{% empty %}
-<p>注文履歴はまだありません。</p>
-{% endfor %}
 {% endblock %}
