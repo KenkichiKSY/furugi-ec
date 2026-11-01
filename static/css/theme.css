@@ -201,6 +201,17 @@ main.container{padding-block:32px 56px;}
 .swatch.denim{background:repeating-linear-gradient(45deg, rgba(0,0,0,.10) 0 1px, transparent 1px 5px), linear-gradient(155deg, var(--denim), var(--denim-deep));}
 .swatch.denim .tag{color:var(--bg); background:var(--denim-deep);}
 
+/* ---------- trust ---------- */
+.trust{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:28px;
+  padding-block:32px; margin-bottom:8px;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+@media (max-width:760px){ .trust{grid-template-columns:1fr;} }
+.trust h3{font-size:1rem; display:flex; gap:10px; align-items:center;}
+.trust h3 svg{width:20px; height:20px; stroke:var(--rust); fill:none; stroke-width:1.6; flex:none;}
+.trust p{color:var(--ink-soft); font-size:0.9rem; margin:8px 0 0;}
+
 /* ---------- about ---------- */
 .about-split{
   display:grid; grid-template-columns:0.9fr 1.1fr; gap:40px;
