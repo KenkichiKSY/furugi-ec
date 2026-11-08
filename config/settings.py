@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',
     'accounts',
     'products',
     'orders',
@@ -142,10 +143,32 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+# 商品画像の保存先(S3)
+# AWS_STORAGE_BUCKET_NAME が設定されていればS3を使用し、未設定ならローカルファイルシステムを使う
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'ap-northeast-1')
+
+USE_S3 = bool(AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
+
+if USE_S3:
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None  # バケットポリシーで公開読み取りを許可するため、ACLは使わない
+    AWS_QUERYSTRING_AUTH = False  # 公開バケットなので署名付きURLは不要
+    AWS_LOCATION = 'media'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+else:
+    MEDIA_URL = 'media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+
 STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
+    "default": (
+        {"BACKEND": "storages.backends.s3.S3Storage"}
+        if USE_S3 else
+        {"BACKEND": "django.core.files.storage.FileSystemStorage"}
+    ),
     "staticfiles": {
         "BACKEND": (
             "django.contrib.staticfiles.storage.StaticFilesStorage"
@@ -173,9 +196,6 @@ MAILERS = {
 }
 
 DEFAULT_FROM_EMAIL = 'noreply@furugi-shop.example.com'
-
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_REDIRECT_URL = 'products:list'
 LOGOUT_REDIRECT_URL = 'products:list'
